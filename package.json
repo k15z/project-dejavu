@@ -1,0 +1,14 @@
+{
+    "name": "project-dejavu",
+    "version": "0.1.0",
+    "main": "dejavu.js",
+    "author": "Kevin Zhang <kevz@mit.edu>",
+    "license": "MIT",
+    "dependencies": {
+        "body-parser": "^1.15.2",
+        "express": "^4.14.0",
+        "mongodb": "^2.2.0",
+        "multer": "^1.1.0",
+        "rimraf": "^2.5.3"
+    }
+}

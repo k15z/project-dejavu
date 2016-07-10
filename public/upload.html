@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Project Dejavu</title>
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="manifest" href="/js/manifest.json">
+    <link rel="icon" type="image/png" href="/img/favicon.png">
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans|Raleway" rel="stylesheet">
+    <style>
+        *, body, p {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Raleway', sans-serif;
+        }
+
+        h1, h2, h3, h4, h5 {
+            font-family: 'Open Sans', sans-serif;
+        }
+
+        header {
+            padding: 4px;
+            color: #FFFFFF;
+            background-color: #23B960;
+        }
+
+        header * {
+            display: inline-block;
+            vertical-align: baseline;
+        }
+
+        header a {
+            color: #FFFFFF;
+            cursor: pointer;
+            margin-left: 8px;
+            text-decoration: none;
+        }
+
+        header a:hover {
+            text-decoration: underline;
+        }
+
+        main {
+            padding: 6px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Project Dejavu</h1>
+        <a href="/">main</a>
+        <a target="_blank" href="https://docs.google.com/document/d/1luqgBHuMEhDwr2DcZKv_OJcyun1yrkh9GFAiw8Dva10/edit?usp=sharing">docs</a>
+    </header>
+    <main>
+        <form method="POST" action="/api/upload" enctype="multipart/form-data">
+            <h1>Upload content here.</h1>
+            <p>The file name will be used as the label.</p>
+            <input name="video" type="file"/>
+            <input type="submit" value="Submit"/>
+        </form>
+    </main>
+</body>
+</html>

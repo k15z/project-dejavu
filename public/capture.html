@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Project Dejavu</title>
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="manifest" href="/js/manifest.json">
+    <link rel="icon" type="image/png" href="/img/favicon.png">
+    <link href="https://fonts.googleapis.com/css?family=Indie+Flower|Open+Sans" rel="stylesheet">
+    <style>
+        [v-cloak] {
+            display: none;
+        }
+
+        *, body, p {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Raleway', sans-serif;
+        }
+
+        h1, h2, h3, h4, h5 {
+            font-family: 'Open Sans', sans-serif;
+        }
+
+        body {
+            font-family: 'Open Sans', sans-serif;
+            color: white;
+            background-color: #333333;
+            position: absolute;
+            top: 0; bottom: 0;
+            left: 0; right: 0;
+            margin: 0;
+            padding: 0;
+        }
+
+        canvas {
+            transform: translate(-50%,-50%);
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            height: 100%;
+            background-color: #222222;
+        }
+
+        .overlay {
+            position: absolute;
+            top: 0; bottom: 0;
+            left: 0; right: 0;
+        }
+
+        .overlay button {
+            transform: translate(-50%,-50%);
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            width: 72px;
+            height: 72px;
+            border-radius: 72px;
+            color: white;
+            border: 1px solid white;
+            background-color: transparent;
+        }
+
+        .overlay .counter {
+            transform: translate(-50%,-50%);
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            width: 72px;
+            height: 72px;
+            border-radius: 72px;
+            color: white;
+            border: 1px solid white;
+            background-color: transparent;
+        }
+
+        .results.overlay {
+            padding: 1em;
+            background-color: #333333;
+        }
+    </style>
+</head>
+<body>
+    <canvas></canvas>
+    <div class="overlay" v-if="!counter.finished" v-cloak>
+        <button v-if="!counter.started" @click="dejavu()">Dejavu!</button>
+        <button v-cloak class="counter" v-if="counter.started">{{counter.value}}</button>
+    </div>
+    <div class="results overlay" v-if="results" v-cloak>
+        <p v-for="result in results">
+            #{{$index + 1}}
+             - 
+            ({{result.raw_json[1]}})
+             - 
+            {{result.label}}
+        </p>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.0/jquery.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/1.0.26/vue.min.js"></script>
+    <script type="text/javascript" src="/js/adapter-latest.js"></script>
+    <script>
+        navigator.getUserMedia = navigator.getUserMedia || 
+                                    navigator.webkitGetUserMedia || 
+                                    navigator.mozGetUserMedia || 
+                                    navigator.msGetUserMedia || 
+                                    navigator.oGetUserMedia;
+        navigator.getUserMedia({video: { facingMode: { exact: "environment" } }}, handleVideo, videoError);
+
+        var canvas = document.querySelector('canvas');
+        var context = canvas.getContext('2d')
+        function handleVideo (stream) {
+            var video = document.createElement('video')
+            video.autoplay = "true";
+            video.src = window.URL.createObjectURL(stream);
+            function render () {
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+                context.drawImage(video, 0, 0);
+                context.fillStyle = "#23B960";
+                context.fillRect(50, 100-2, canvas.width - 100, 2);
+                context.fillRect(50-2, 100, 2, canvas.height - 200);
+                context.fillRect(50, canvas.height - 100, canvas.width - 100, 2);
+                context.fillRect(canvas.width - 50, 100, 2, canvas.height - 200);
+                window.requestAnimationFrame(render)
+            }
+            window.requestAnimationFrame(render)
+        }
+        function videoError (error) {
+            console.log(error)
+        }
+
+        var vm = new Vue({
+            el: "body",
+            data: {
+                cid: "",
+                counter: {
+                    started: false,
+                    finished: false,
+                    value: 7
+                },
+                results: false
+            },
+            methods: {
+                dejavu: function () {
+                    var self = this;
+                    self.counter.started = true;
+                    setTimeout(function() {
+                        self.counter.finished = true;
+                        $.ajax({url: "api/capture/" + self.cid + "/compute"}).done(function (data) {
+                            console.log(data);
+                            self.results = data;
+                        })
+                    }, 1000 * (self.counter.value + 1))
+                    for (var i = 0; i < self.counter.value; i++)
+                        setTimeout(function() {
+                            self.counter.value--;
+
+                            var cv = document.createElement('canvas');
+                            var ctx = cv.getContext('2d');
+                            var ratio = 1.0;
+                            if (canvas.width > 120)
+                                ratio = 120 / canvas.width;
+                            cv.width = canvas.width * ratio;
+                            cv.height = canvas.height * ratio;
+                            ctx.drawImage(canvas, 50, 100, canvas.width - 100, canvas.height - 200, 0, 0, cv.width, cv.height);
+
+                            $.ajax({
+                                url: "api/capture/" + self.cid,
+                                method: "POST",
+                                data: {
+                                    image: cv.toDataURL()
+                                }
+                            });
+                        }, 1000 * (i + 1))
+                }
+            },
+            created: function () {
+                var self = this;
+                $.ajax({url: "api/capture"})
+                    .done(function (data) {
+                        self.cid = data.cid;
+                    });
+            }
+        });
+    </script>
+</body>
+</html>

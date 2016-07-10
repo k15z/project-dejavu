@@ -83,3 +83,6 @@ $RECYCLE.BIN/
 
 # Windows shortcuts
 *.lnk
+
+# Sample videos
+*.mp4
